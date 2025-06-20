@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+/* After all existing rules in App.css */
+
+.App-header {
+  /* remove the full-viewport height so main shows up immediately */
+  min-height: auto !important;
+  padding: 2rem 0;
+}
+

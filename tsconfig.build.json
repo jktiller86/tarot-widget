@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/mount.tsx",
+    "src/components/**/*.tsx"
+  ],
+  "exclude": [
+    "src/App.tsx",
+    "src/index.tsx",
+    "src/**/*.test.tsx"
+  ]
+}
