@@ -19,9 +19,11 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Missing fields' };
   }
 
+  // pull in your Flodesk key from the environment
   const apiKey = process.env.FLODESK_API_KEY;
-  const segmentId = '6837bb1f44c6f4a39a996561';  // your Flodesk segment ID
+  console.log('🔑 Using Flodesk key (redacted in UI):', apiKey);  // log it for debugging
 
+  const segmentId = '6837bb1f44c6f4a39a996561';  // your Flodesk segment ID
   const auth = Buffer.from(`${apiKey}:`).toString('base64');
 
   try {
@@ -53,6 +55,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({ success: true })
     };
   } catch (err) {
+    console.log('❗ Flodesk error:', err);
     return { statusCode: 500, body: `Server error: ${err.message}` };
   }
 };
