@@ -1,29 +1,56 @@
 // netlify/functions/subscribe.js
-
 const fetch = require('node-fetch');
 
 exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  // these headers allow any origin to POST, and let the browser send JSON
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+
+  // 1) handle the browser’s preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: ''
+    };
   }
 
+  // 2) reject anything that isn't a POST
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: corsHeaders,
+      body: 'Method Not Allowed'
+    };
+  }
+
+  // 3) parse & validate the incoming JSON
   let payload;
   try {
     payload = JSON.parse(event.body);
   } catch {
-    return { statusCode: 400, body: 'Invalid JSON' };
+    return {
+      statusCode: 400,
+      headers: corsHeaders,
+      body: 'Invalid JSON'
+    };
   }
 
   const { name, email, cardNumber } = payload;
   if (!name || !email || !cardNumber) {
-    return { statusCode: 400, body: 'Missing fields' };
+    return {
+      statusCode: 400,
+      headers: corsHeaders,
+      body: 'Missing fields'
+    };
   }
 
-  // pull in your Flodesk key from the environment
+  // 4) call Flodesk
   const apiKey = process.env.FLODESK_API_KEY;
-  console.log('🔑 Using Flodesk key (redacted in UI):', apiKey);  // log it for debugging
-
-  const segmentId = '6837bb1f44c6f4a39a996561';  // your Flodesk segment ID
+  const segmentId = '6837bb1f44c6f4a39a996561';
   const auth = Buffer.from(`${apiKey}:`).toString('base64');
 
   try {
@@ -44,18 +71,24 @@ exports.handler = async function(event) {
     const data = await response.json();
 
     if (!response.ok) {
+      // forward Flodesk’s error
       return {
         statusCode: response.status,
+        headers: corsHeaders,
         body: JSON.stringify({ error: data })
       };
     }
 
     return {
       statusCode: 200,
+      headers: corsHeaders,
       body: JSON.stringify({ success: true })
     };
   } catch (err) {
-    console.log('❗ Flodesk error:', err);
-    return { statusCode: 500, body: `Server error: ${err.message}` };
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: `Server error: ${err.message}`
+    };
   }
 };
