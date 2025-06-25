@@ -2,6 +2,7 @@
   "name": "tarot-widget",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -19,12 +20,17 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "microbundle": "^0.15.0"
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.44.0",
+    "rollup-plugin-typescript2": "^0.36.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:widget": "microbundle build --entry src/mount.tsx --name TarotCardWidget --output dist/tarot-widget.js --format iife --replace \"process.env.SUBSCRIBE_ENDPOINT='https://tarot-widget.netlify.app/.netlify/functions/subscribe'\"",
+    "build:widget": "rollup -c rollup.config.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
