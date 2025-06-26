@@ -177,10 +177,10 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                     : { rotateY: isFlipped ? 180 : 0 }
                 }
                 transition={{
-                  duration: step === 'shuffle' ? 0.8 : 0.8,
+                  duration: step === 'shuffle' ? 1.2 : 0.8,
                   ease: 'easeInOut',
                   delay: step === 'shuffle' ? i * 0.1 : 0,
-                  repeat: step === 'shuffle' ? 4 : 0,
+                  repeat: step === 'shuffle' ? 2 : 0,
                 }}
                 style={{
                   position: 'absolute',
@@ -258,10 +258,19 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               margin: '20px auto',
             }}
           >
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: '0 0 8px 0', fontSize: 18, fontWeight: 'bold' }}>Want the full message?</h3>
+              <p style={{ margin: '0 0 4px 0', fontSize: 14, color: '#666' }}>
+                Pop your name & email below. Then check your inbox.
+              </p>
+              <p style={{ margin: 0, fontSize: 12, color: '#888', fontStyle: 'italic' }}>
+                (You'll get your divine message <strong>and</strong> be first to know when Seea launches in September. Good energy only, no spam. Promise.)
+              </p>
+            </div>
             <input
               name="name"
               type="text"
-              placeholder="Your Name"
+              placeholder="First Name"
               required
               style={{
                 width: '100%',
