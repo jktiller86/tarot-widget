@@ -1,94 +1,139 @@
 // netlify/functions/subscribe.js
-const fetch = require('node-fetch');
 
-exports.handler = async function(event) {
-  // these headers allow any origin to POST, and let the browser send JSON
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-  };
+const CARD_TO_SEGMENT = {
+  1: '6851138013ae07b36eaa1f42',
+  2: '68511892d44dc554226892a8',
+  3: '6851189e3e5630e216b2f81a',
+  4: '685118a99c7af958d61df58b',
+  5: '685118c213ae07b36eaa1f52',
+  6: '685118cb9ce8512c9a95f76a',
+  7: '685119273e5630e216b2f81d',
+  8: '6851193113ae07b36eaa1f56',
+  9: '6851194a13ae07b36eaa1f57',
+  10: '6851193c9b2c51483b3b2c6b',
+  11: '685119675a0783be596ad3b7',
+  12: '685119705a0783be596ad3b8',
+  13: '6851197bd44dc554226892ae',
+  14: '685119869c7af958d61df58d',
+  15: '6851198e503530cb32b9541f',
+  16: '685119963e5630e216b2f828',
+  17: '685119a09ce8512c9a95f76f',
+  18: '685119abdebf48a3fa99bd49',
+  19: '685119b4503530cb32b95420',
+  20: '685119bd503530cb32b95421',
+  21: '685119c73e5630e216b2f829',
+  22: '685119cf9ce8512c9a95f770',
+  23: '685119d95a0783be596ad3b9',
+  24: '685119e213ae07b36eaa1f5c',
+  25: '685119ea9ce8512c9a95f771',
+  26: '685119f25a0783be596ad3bb',
+  27: '685119f9503530cb32b95422',
+  28: '68511a01d44dc554226892b1',
+  29: '68511a15503530cb32b95423',
+  30: '68511a0adebf48a3fa99bd4c',
+};
 
-  // 1) handle the browser’s preflight OPTIONS request
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: ''
-    };
-  }
-
-  // 2) reject anything that isn't a POST
+exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders,
-      body: 'Method Not Allowed'
+      body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
-
-  // 3) parse & validate the incoming JSON
-  let payload;
-  try {
-    payload = JSON.parse(event.body);
-  } catch {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: 'Invalid JSON'
-    };
-  }
-
-  const { name, email, cardNumber } = payload;
-  if (!name || !email || !cardNumber) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: 'Missing fields'
-    };
-  }
-
-  // 4) call Flodesk
-  const apiKey = process.env.FLODESK_API_KEY;
-  const segmentId = '6837bb1f44c6f4a39a996561';
-  const auth = Buffer.from(`${apiKey}:`).toString('base64');
 
   try {
-    const response = await fetch('https://api.flodesk.com/v1/subscribers', {
+    const { name, email, cardNumber } = JSON.parse(event.body);
+
+    // Validate inputs
+    if (!name || !email || !cardNumber) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Missing required fields' }),
+      };
+    }
+
+    // Get the segment ID for this card
+    const segmentId = CARD_TO_SEGMENT[cardNumber];
+    if (!segmentId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid card number' }),
+      };
+    }
+
+    // Get Flodesk API key from environment variable
+    const FLODESK_API_KEY = process.env.FLODESK_API_KEY;
+    if (!FLODESK_API_KEY) {
+      console.error('FLODESK_API_KEY not configured');
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Server configuration error' }),
+      };
+    }
+
+    // Create or update subscriber in Flodesk
+    const subscriberResponse = await fetch('https://api.flodesk.com/v1/subscribers', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Basic ${Buffer.from(FLODESK_API_KEY + ':').toString('base64')}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         email,
         first_name: name,
-        custom_fields: { card_number: cardNumber.toString() },
-        segment_ids: [segmentId]
-      })
+        // You can add custom fields here if needed
+        custom_fields: {
+          card_number: cardNumber
+        }
+      }),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      // forward Flodesk’s error
+    if (!subscriberResponse.ok) {
+      const error = await subscriberResponse.text();
+      console.error('Flodesk subscriber error:', error);
       return {
-        statusCode: response.status,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: data })
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Failed to create subscriber' }),
       };
+    }
+
+    const subscriber = await subscriberResponse.json();
+
+    // Add subscriber to the specific segment
+    const segmentResponse = await fetch(`https://api.flodesk.com/v1/subscribers/${subscriber.id}/segments/${segmentId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(FLODESK_API_KEY + ':').toString('base64')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!segmentResponse.ok) {
+      const error = await segmentResponse.text();
+      console.error('Flodesk segment error:', error);
+      // Don't fail the whole request if segment addition fails
+      // The subscriber was still created
     }
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ success: true })
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ 
+        success: true,
+        message: 'Successfully subscribed!',
+        cardNumber,
+        segmentId,
+      }),
     };
-  } catch (err) {
+
+  } catch (error) {
+    console.error('Error:', error);
     return {
       statusCode: 500,
-      headers: corsHeaders,
-      body: `Server error: ${err.message}`
+      body: JSON.stringify({ error: 'Internal server error' }),
     };
   }
 };
