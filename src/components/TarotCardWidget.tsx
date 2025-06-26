@@ -51,7 +51,18 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
   const [step, setStep] = useState<'idle' | 'shuffle' | 'flip' | 'form'>('idle');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const isFlipped = step === 'flip' || step === 'form';
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const draw = () => {
     // Only allow drawing if user hasn't drawn yet
@@ -111,22 +122,37 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
     }
   };
 
-  const [copySuccess, setCopySuccess] = useState(false);
-
-  const shareToSocial = (platform: 'instagram' | 'facebook') => {
+  const shareCard = async () => {
     if (!currentCard) return;
     
     const shareText = `I just drew card #${currentCard.number} from the Seea Tarot deck! Get your own reading at seea.co`;
-    const shareUrl = 'https://seea.co';
     
-    if (platform === 'instagram') {
-      // Copy to clipboard for Instagram
-      navigator.clipboard.writeText(shareText).then(() => {
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 3000);
-      });
-    } else if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank');
+    // Use Web Share API if available (works for both Instagram and Facebook stories on mobile)
+    if (navigator.share) {
+      try {
+        // Check if we can share files
+        if (navigator.canShare && navigator.canShare({ files: [new File([], 'test')] })) {
+          // Fetch and share the card image
+          const response = await fetch(currentCard.url);
+          const blob = await response.blob();
+          const file = new File([blob], `seea-tarot-card-${currentCard.number}.jpg`, { type: 'image/jpeg' });
+          
+          await navigator.share({
+            files: [file],
+            title: 'My Seea Tarot Card',
+            text: shareText,
+          });
+        } else {
+          // Share without files if file sharing not supported
+          await navigator.share({
+            title: 'My Seea Tarot Card',
+            text: shareText,
+            url: 'https://seea.co',
+          });
+        }
+      } catch (err) {
+        console.log('Share cancelled or failed:', err);
+      }
     }
   };
 
@@ -151,9 +177,10 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                     : { rotateY: isFlipped ? 180 : 0 }
                 }
                 transition={{
-                  duration: step === 'shuffle' ? 3.5 : 0.8,
+                  duration: step === 'shuffle' ? 0.8 : 0.8,
                   ease: 'easeInOut',
                   delay: step === 'shuffle' ? i * 0.1 : 0,
+                  repeat: step === 'shuffle' ? 4 : 0,
                 }}
                 style={{
                   position: 'absolute',
@@ -196,39 +223,28 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
 
       {step === 'form' && (
         <>
-          {/* Social sharing buttons */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ color: '#666', marginBottom: 10 }}>Share your card:</p>
-            <button
-              onClick={() => shareToSocial('instagram')}
-              style={{
-                background: '#E4405F',
-                color: '#fff',
-                padding: '8px 16px',
-                fontSize: 14,
-                border: 'none',
-                borderRadius: 6,
-                cursor: 'pointer',
-                marginRight: 8,
-              }}
-            >
-              {copySuccess ? 'Copied!' : 'Copy for Instagram'}
-            </button>
-            <button
-              onClick={() => shareToSocial('facebook')}
-              style={{
-                background: '#4267B2',
-                color: '#fff',
-                padding: '8px 16px',
-                fontSize: 14,
-                border: 'none',
-                borderRadius: 6,
-                cursor: 'pointer',
-              }}
-            >
-              Share on Facebook
-            </button>
-          </div>
+          {/* Social sharing button - mobile only */}
+          {isMobile && (
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ color: '#666', marginBottom: 10 }}>Share your card:</p>
+              <button
+                onClick={shareCard}
+                style={{
+                  background: 'linear-gradient(45deg, #E4405F 0%, #4267B2 100%)',
+                  color: '#fff',
+                  padding: '12px 24px',
+                  fontSize: 16,
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                }}
+              >
+                Share Your Card
+              </button>
+            </div>
+          )}
 
           <form
             onSubmit={handleSubmit}
