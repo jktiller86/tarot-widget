@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Widget Test</title>
+</head>
+<body>
+    <h1>Testing Tarot Widget Locally</h1>
+
+    <!-- Widget mount point -->
+    <div id="tarot-widget-root"></div>
+
+    <!-- Load the local build -->
+    <script src="./dist/tarot-widget.js"></script>
+
+    <!-- Initialize -->
+    <script>
+        window.addEventListener('load', function() {
+            if (window.TarotCardWidget && window.TarotCardWidget.init) {
+                console.log('Widget loaded successfully!');
+                window.TarotCardWidget.init({
+                    root: '#tarot-widget-root',
+                    subscribeEndpoint: 'https://tarot-widget.netlify.app/.netlify/functions/subscribe'
+                });
+            } else {
+                console.error('Widget failed to load');
+            }
+        });
+    </script>
+</body>
+</html>

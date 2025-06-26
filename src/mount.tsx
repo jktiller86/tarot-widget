@@ -1,28 +1,22 @@
 // src/mount.tsx
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import TarotCardWidget from './components/TarotCardWidget';
 
-export interface MountOptions {
-  subscribeEndpoint: string;
-}
+type InitOptions = {
+  root: string;              // CSS selector for mount point
+  subscribeEndpoint: string; // your Netlify function URL
+};
 
-function mountTarotWidget(
-  containerSelector: string,
-  options: MountOptions
-) {
-  const container = document.querySelector(containerSelector);
-  if (!container) {
-    console.error('TarotWidget: container not found', containerSelector);
+export function init(options: InitOptions) {
+  const el = document.querySelector(options.root);
+  if (!el) {
+    console.warn('[TarotCardWidget] root element not found:', options.root);
     return;
   }
-
-  const root = ReactDOM.createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <TarotCardWidget subscribeEndpoint={options.subscribeEndpoint} />
-    </React.StrictMode>
-  );
+  const root = createRoot(el as HTMLElement);
+  root.render(<TarotCardWidget subscribeEndpoint={options.subscribeEndpoint} />);
 }
 
-;(window as any).mountTarotWidget = mountTarotWidget;
+// expose to window
+;(window as any).TarotCardWidget = { init };

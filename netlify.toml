@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build:widget && cp public/index.html dist/"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[headers]]
+  for = "/tarot-widget.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Access-Control-Allow-Origin = "*"
