@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build:widget"
+  command = "npm run build:widget && cp public/index.html dist/"
   publish = "dist"
   functions = "netlify/functions"
 
