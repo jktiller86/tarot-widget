@@ -97,15 +97,14 @@ exports.handler = async (event, context) => {
 
     const subscriber = await subscriberResponse.json();
 
-    // Now add the subscriber to the segment
-    const segmentResponse = await fetch('https://api.flodesk.com/v1/subscribers/add-to-segments', {
+    // Now add the subscriber to the segment using the correct endpoint
+    const segmentResponse = await fetch(`https://api.flodesk.com/v1/subscribers/${subscriber.id}/segments`, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${Buffer.from(FLODESK_API_KEY + ':').toString('base64')}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        subscriber_id: subscriber.id,
         segment_ids: [segmentId],
       }),
     });
