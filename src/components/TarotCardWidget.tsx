@@ -11,7 +11,8 @@ interface Props {
   subscribeEndpoint: string;
 }
 
-const COVER_URL = 'https://cdn.prod.website-files.com/68379778f107ba359adbbfe8/6837a124b1a11a779600fb94_Cover.jpg';
+const COVER_URL =
+  'https://cdn.prod.website-files.com/68379778f107ba359adbbfe8/6837a124b1a11a779600fb94_Cover.jpg';
 
 const cards: Card[] = [
   { number: 1, url: 'https://cdn.prod.website-files.com/68379778f107ba359adbbcdf8/6837a123832438a378bbcdf8_01.jpg' },
@@ -49,6 +50,7 @@ const cards: Card[] = [
 const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [step, setStep] = useState<'idle' | 'shuffle' | 'flip' | 'form'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const isFlipped = step === 'flip' || step === 'form';
 
   const draw = () => {
@@ -56,6 +58,7 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
       const next = cards[Math.floor(Math.random() * cards.length)];
       setCurrentCard(next);
       setStep('shuffle');
+      setStatus('idle');
     }
   };
 
@@ -76,16 +79,33 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!currentCard) return;
-    await fetch(subscribeEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: (e.target as any).name.value,
-        email: (e.target as any).email.value,
-        cardNumber: currentCard.number
-      })
-    });
-    setStep('form');
+
+    const form = e.target as HTMLFormElement;
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+
+    setStatus('loading');
+    try {
+      const res = await fetch(subscribeEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          cardNumber: currentCard.number,
+        }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setStatus('success');
+      } else {
+        console.error(json);
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus('error');
+    }
   };
 
   return (
@@ -95,34 +115,143 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
         <div style={{ position: 'relative', width: 280, height: 420, margin: '0 auto' }}>
           {[0, 1, 2].map((_, i) => {
             const backImage = COVER_URL;
-            const frontImage = i === 0 && isFlipped && currentCard ? currentCard.url : COVER_URL;
+            const frontImage =
+              i === 0 && isFlipped && currentCard ? currentCard.url : COVER_URL;
             return (
               <motion.div
                 key={i}
                 animate={
                   step === 'shuffle'
-                    ? { x: [0, -30, 40, -20, 30, 0], y: [0, -20, -10, -15, -5, 0], rotate: [0, -5, 3, -2, 4, 0] }
+                    ? {
+                        x: [0, -30, 40, -20, 30, 0],
+                        y: [0, -20, -10, -15, -5, 0],
+                        rotate: [0, -5, 3, -2, 4, 0],
+                      }
                     : { rotateY: isFlipped ? 180 : 0 }
                 }
-                transition={{ duration: step=== 'shuffle' ? 2 : 0.8, ease: 'easeInOut', delay: step=== 'shuffle'? i*0.1 : 0 }}
-                style={{ position: 'absolute', width: '100%', height: '100%', transformStyle: 'preserve-3d', zIndex: 3 - i }}
+                transition={{
+                  duration: step === 'shuffle' ? 2 : 0.8,
+                  ease: 'easeInOut',
+                  delay: step === 'shuffle' ? i * 0.1 : 0,
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  transformStyle: 'preserve-3d',
+                  zIndex: 3 - i,
+                }}
               >
-                <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, boxShadow: '0 4px 8px rgba(0,0,0,0.1)', background: `url(${backImage}) center/cover no-repeat` }} />
-                <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, boxShadow: '0 4px 8px rgba(0,0,0,0.1)', transform: 'rotateY(180deg)', background: `url(${frontImage}) center/cover no-repeat` }} />
+                {/* back */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    backfaceVisibility: 'hidden',
+                    borderRadius: 12,
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                    background: `url(${backImage}) center/cover no-repeat`,
+                  }}
+                />
+                {/* front */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)',
+                    borderRadius: 12,
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                    background: `url(${frontImage}) center/cover no-repeat`,
+                  }}
+                />
               </motion.div>
             );
           })}
         </div>
       </div>
+
       {step === 'form' && (
-        <form onSubmit={handleSubmit} style={{ background: '#f5f5f5', padding: 20, borderRadius: 12, marginTop: 20, textAlign: 'left', maxWidth: 280, margin: '20px auto' }}>
-          <input name="name" type="text" placeholder="Your Name" required style={{ width: '100%', padding: 10, fontSize: 16, borderRadius: 6, border: '1px solid #ddd', marginBottom: 12 }} />
-          <input name="email" type="email" placeholder="Your Email" required style={{ width: '100%', padding: 10, fontSize: 16, borderRadius: 6, border: '1px solid #ddd', marginBottom: 12 }} />
-          <button type="submit" style={{ width: '100%', background: '#333', color: '#fff', padding: 12, fontSize: 16, border: 'none', borderRadius: 6, cursor: 'pointer' }}>Get My Reading</button>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            background: '#f5f5f5',
+            padding: 20,
+            borderRadius: 12,
+            marginTop: 20,
+            textAlign: 'left',
+            maxWidth: 280,
+            margin: '20px auto',
+          }}
+        >
+          <input
+            name="name"
+            type="text"
+            placeholder="Your Name"
+            required
+            style={{
+              width: '100%',
+              padding: 10,
+              fontSize: 16,
+              borderRadius: 6,
+              border: '1px solid #ddd',
+              marginBottom: 12,
+            }}
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Your Email"
+            required
+            style={{
+              width: '100%',
+              padding: 10,
+              fontSize: 16,
+              borderRadius: 6,
+              border: '1px solid #ddd',
+              marginBottom: 12,
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              background: '#333',
+              color: '#fff',
+              padding: 12,
+              fontSize: 16,
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+            }}
+          >
+            Get My Reading
+          </button>
         </form>
       )}
+
+      {/* status messages */}
+      {status === 'loading' && <p>Sending…</p>}
+      {status === 'success' && <p style={{ color: 'green' }}>✅ Check your email soon!</p>}
+      {status === 'error' && <p style={{ color: 'red' }}>❌ Something went wrong.</p>}
+
+      {/* draw again */}
       {step === 'form' && (
-        <button onClick={draw} style={{ marginTop: 16, background: '#333', color: '#fff', padding: '12px 30px', fontSize: 16, border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+        <button
+          onClick={draw}
+          style={{
+            marginTop: 16,
+            background: '#333',
+            color: '#fff',
+            padding: '12px 30px',
+            fontSize: 16,
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+          }}
+        >
           Draw Another Card
         </button>
       )}
