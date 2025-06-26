@@ -43,6 +43,8 @@ exports.handler = async (event, context) => {
 
   try {
     const { name, email, cardNumber } = JSON.parse(event.body);
+    
+    console.log('Received request:', { name, email, cardNumber });
 
     // Validate inputs
     if (!name || !email || !cardNumber) {
@@ -71,7 +73,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Create or update subscriber in Flodesk
+    // First, create or update the subscriber
     const subscriberResponse = await fetch('https://api.flodesk.com/v1/subscribers', {
       method: 'POST',
       headers: {
@@ -79,12 +81,8 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email,
+        email: email,
         first_name: name,
-        // You can add custom fields here if needed
-        custom_fields: {
-          card_number: cardNumber
-        }
       }),
     });
 
@@ -99,13 +97,17 @@ exports.handler = async (event, context) => {
 
     const subscriber = await subscriberResponse.json();
 
-    // Add subscriber to the specific segment
-    const segmentResponse = await fetch(`https://api.flodesk.com/v1/subscribers/${subscriber.id}/segments/${segmentId}`, {
+    // Now add the subscriber to the segment
+    const segmentResponse = await fetch('https://api.flodesk.com/v1/subscribers/add-to-segments', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${Buffer.from(FLODESK_API_KEY + ':').toString('base64')}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        subscriber_id: subscriber.id,
+        segment_ids: [segmentId],
+      }),
     });
 
     if (!segmentResponse.ok) {
