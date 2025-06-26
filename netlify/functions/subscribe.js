@@ -34,9 +34,25 @@ const CARD_TO_SEGMENT = {
 };
 
 exports.handler = async (event, context) => {
+  // Handle CORS preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
+      body: '',
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -50,6 +66,9 @@ exports.handler = async (event, context) => {
     if (!name || !email || !cardNumber) {
       return {
         statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({ error: 'Missing required fields' }),
       };
     }
@@ -59,6 +78,9 @@ exports.handler = async (event, context) => {
     if (!segmentId) {
       return {
         statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({ error: 'Invalid card number' }),
       };
     }
@@ -69,6 +91,9 @@ exports.handler = async (event, context) => {
       console.error('FLODESK_API_KEY not configured');
       return {
         statusCode: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({ error: 'Server configuration error' }),
       };
     }
@@ -91,6 +116,9 @@ exports.handler = async (event, context) => {
       console.error('Flodesk subscriber error:', error);
       return {
         statusCode: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({ error: 'Failed to create subscriber' }),
       };
     }
@@ -121,6 +149,8 @@ exports.handler = async (event, context) => {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
       body: JSON.stringify({ 
         success: true,
@@ -134,6 +164,9 @@ exports.handler = async (event, context) => {
     console.error('Error:', error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({ error: 'Internal server error' }),
     };
   }
