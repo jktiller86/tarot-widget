@@ -265,7 +265,7 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               <p style={{ 
                 margin: '0 auto', 
                 fontSize: 14, 
-                color: '#ffffff',
+                color: '#f94c16',
                 fontStyle: 'italic',
                 fontFamily: '"Space Mono", monospace',
                 lineHeight: '1.4',
@@ -361,8 +361,8 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               <button
                 onClick={shareCard}
                 style={{
-                  background: '#5959c9',
-                  color: '#ffffff',
+                  background: '#fda61e',
+                  color: '#f94c16',
                   padding: '12px 24px',
                   fontSize: 16,
                   fontFamily: '"Space Grotesk", sans-serif',
