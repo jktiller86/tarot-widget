@@ -236,36 +236,42 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               borderRadius: 16,
               marginTop: 20,
               textAlign: 'left',
-              maxWidth: 320,
+              maxWidth: 280,
               margin: '20px auto',
               border: '2px solid rgba(206, 246, 100, 0.3)',
             }}
           >
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <h3 style={{ 
-                margin: '0 0 8px 0', 
-                fontSize: 30, 
+                margin: '0 0 12px 0', 
+                fontSize: 36, 
                 fontFamily: '"Space Grotesk", sans-serif',
                 fontWeight: 500,
                 color: '#13122f',
-                letterSpacing: '0.5px'
+                letterSpacing: '0px',
+                textTransform: 'uppercase',
+                lineHeight: '110%'
               }}>Want the full message?</h3>
               <p style={{ 
                 margin: '0 0 4px 0', 
                 fontSize: 16, 
                 color: '#13122f',
                 fontFamily: '"Space Mono", monospace',
-                fontWeight: 400
+                fontWeight: 400,
+                marginBottom: 16
               }}>
-                Pop your name & email below. Then check your inbox (and your Junk).
+                Pop your name & email below. Then check your inbox (and your junk).
               </p>
               <p style={{ 
                 margin: 0, 
                 fontSize: 14, 
-                color: '#5959c9',
+                color: '#ffffff',
                 fontStyle: 'italic',
                 fontFamily: '"Space Mono", monospace',
-                lineHeight: '1.4'
+                lineHeight: '1.4',
+                backgroundColor: 'rgba(89, 89, 201, 0.8)',
+                padding: '12px 16px',
+                borderRadius: 8,
               }}>
                 (You'll get your divine message <strong>and</strong> be first to know when Seea launches in September. Good energy only, no spam. Promise.)
               </p>
@@ -300,11 +306,20 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               required
               style={{
                 width: '100%',
-                padding: 10,
+                padding: 12,
                 fontSize: 16,
-                borderRadius: 6,
-                border: '1px solid #ddd',
+                fontFamily: '"Space Mono", monospace',
+                borderRadius: 8,
+                border: '2px solid #cef664',
                 marginBottom: 12,
+                outline: 'none',
+                transition: 'border-color 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#5959c9';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#cef664';
               }}
             />
             <button
