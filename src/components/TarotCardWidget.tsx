@@ -157,7 +157,12 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+    <div style={{ 
+      maxWidth: 600, 
+      margin: '0 auto', 
+      textAlign: 'center',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Neue Haas Grotesk Display", "Space Grotesk", sans-serif'
+    }}>
       <div onClick={draw} style={{ cursor: hasDrawn ? 'default' : 'pointer', perspective: 1000, marginBottom: 20 }}>
         <div style={{ position: 'relative', width: 280, height: 420, margin: '0 auto' }}>
           {[0, 1, 2].map((_, i) => {
@@ -223,47 +228,45 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
 
       {step === 'form' && (
         <>
-          {/* Social sharing button - mobile only */}
-          {isMobile && (
-            <div style={{ marginBottom: 20 }}>
-              <p style={{ color: '#666', marginBottom: 10 }}>Share your card:</p>
-              <button
-                onClick={shareCard}
-                style={{
-                  background: 'linear-gradient(45deg, #E4405F 0%, #4267B2 100%)',
-                  color: '#fff',
-                  padding: '12px 24px',
-                  fontSize: 16,
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                }}
-              >
-                Share Your Card
-              </button>
-            </div>
-          )}
-
           <form
             onSubmit={handleSubmit}
             style={{
-              background: '#f5f5f5',
-              padding: 20,
-              borderRadius: 12,
+              background: 'rgba(206, 246, 100, 0.1)',
+              padding: 24,
+              borderRadius: 16,
               marginTop: 20,
               textAlign: 'left',
-              maxWidth: 280,
+              maxWidth: 320,
               margin: '20px auto',
+              border: '2px solid rgba(206, 246, 100, 0.3)',
             }}
           >
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: 18, fontWeight: 'bold' }}>Want the full message?</h3>
-              <p style={{ margin: '0 0 4px 0', fontSize: 14, color: '#666' }}>
-                Pop your name & email below. Then check your inbox.
+              <h3 style={{ 
+                margin: '0 0 8px 0', 
+                fontSize: 30, 
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontWeight: 500,
+                color: '#13122f',
+                letterSpacing: '0.5px'
+              }}>Want the full message?</h3>
+              <p style={{ 
+                margin: '0 0 4px 0', 
+                fontSize: 16, 
+                color: '#13122f',
+                fontFamily: '"Space Mono", monospace',
+                fontWeight: 400
+              }}>
+                Pop your name & email below. Then check your inbox (and your Junk).
               </p>
-              <p style={{ margin: 0, fontSize: 12, color: '#888', fontStyle: 'italic' }}>
+              <p style={{ 
+                margin: 0, 
+                fontSize: 14, 
+                color: '#5959c9',
+                fontStyle: 'italic',
+                fontFamily: '"Space Mono", monospace',
+                lineHeight: '1.4'
+              }}>
                 (You'll get your divine message <strong>and</strong> be first to know when Seea launches in September. Good energy only, no spam. Promise.)
               </p>
             </div>
@@ -274,11 +277,20 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               required
               style={{
                 width: '100%',
-                padding: 10,
+                padding: 12,
                 fontSize: 16,
-                borderRadius: 6,
-                border: '1px solid #ddd',
+                fontFamily: '"Space Mono", monospace',
+                borderRadius: 8,
+                border: '2px solid #cef664',
                 marginBottom: 12,
+                outline: 'none',
+                transition: 'border-color 0.3s ease',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#5959c9';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#cef664';
               }}
             />
             <input
@@ -299,25 +311,73 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
               type="submit"
               style={{
                 width: '100%',
-                background: '#333',
-                color: '#fff',
-                padding: 12,
-                fontSize: 16,
+                background: '#cef664',
+                color: '#13122f',
+                padding: 14,
+                fontSize: 18,
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontWeight: 500,
                 border: 'none',
-                borderRadius: 6,
+                borderRadius: 8,
                 cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                letterSpacing: '0.5px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#5959c9';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#cef664';
+                e.currentTarget.style.color = '#13122f';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              Get My Reading
+              Send My Message
             </button>
           </form>
+
+          {/* Social sharing button - mobile only */}
+          {isMobile && (
+            <div style={{ marginTop: 20, marginBottom: 20 }}>
+              <button
+                onClick={shareCard}
+                style={{
+                  background: '#5959c9',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontSize: 16,
+                  fontFamily: '"Space Grotesk", sans-serif',
+                  fontWeight: 500,
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ef38a6';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#5959c9';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                }}
+              >
+                Share Your Card
+              </button>
+            </div>
+          )}
         </>
       )}
 
       {/* status messages */}
-      {status === 'loading' && <p>Sending…</p>}
-      {status === 'success' && <p style={{ color: 'green' }}>✅ Check your email soon!</p>}
-      {status === 'error' && <p style={{ color: 'red' }}>❌ Something went wrong.</p>}
+      {status === 'loading' && <p style={{ color: '#5959c9', fontFamily: '"Space Mono", monospace' }}>Sending…</p>}
+      {status === 'success' && <p style={{ color: '#cef664', fontFamily: '"Space Mono", monospace', fontWeight: 500 }}>✨ Check your email soon!</p>}
+      {status === 'error' && <p style={{ color: '#f94c16', fontFamily: '"Space Mono", monospace' }}>❌ Something went wrong.</p>}
     </div>
   );
 };
