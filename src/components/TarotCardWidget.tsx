@@ -161,7 +161,10 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
       maxWidth: 600, 
       margin: '0 auto', 
       textAlign: 'center',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Neue Haas Grotesk Display", "Space Grotesk", sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Neue Haas Grotesk Display", "Space Grotesk", sans-serif',
+      padding: '0 10px',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div onClick={draw} style={{ cursor: hasDrawn ? 'default' : 'pointer', perspective: 1000, marginBottom: 20 }}>
         <div style={{ position: 'relative', width: 280, height: 420, margin: '0 auto' }}>
@@ -231,14 +234,15 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
           <form
             onSubmit={handleSubmit}
             style={{
-              background: 'rgba(206, 246, 100, 0.1)',
+              background: 'rgba(255, 255, 255, 0.95)',
               padding: 24,
               borderRadius: 16,
               marginTop: 20,
               textAlign: 'left',
               maxWidth: 280,
               margin: '20px auto',
-              border: '2px solid rgba(206, 246, 100, 0.3)',
+              border: '2px solid #cef664',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             }}
           >
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -269,11 +273,12 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                 fontStyle: 'italic',
                 fontFamily: '"Space Mono", monospace',
                 lineHeight: '1.4',
-                backgroundColor: 'rgba(89, 89, 201, 0.8)',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 padding: '12px 16px',
                 borderRadius: 8,
                 textAlign: 'center',
-                maxWidth: '90%'
+                maxWidth: '90%',
+                border: '1px solid rgba(249, 76, 22, 0.2)',
               }}>
                 (You'll get your divine message <strong>and</strong> be first to know when Seea launches in September. Good energy only, no spam. Promise.)
               </p>
@@ -379,7 +384,8 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                   e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#5959c9';
+                  e.currentTarget.style.background = '#fda61e';
+                  e.currentTarget.style.color = '#f94c16';
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
                 }}
