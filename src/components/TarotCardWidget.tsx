@@ -2,6 +2,13 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+    fbq?: (...args: any[]) => void;
+  }
+}
+
 interface Card {
   number: number;
   url: string;
@@ -72,6 +79,23 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
       setStep('shuffle');
       setStatus('idle');
       setHasDrawn(true);
+      
+      // Track card draw event
+      if (typeof window !== 'undefined') {
+        // Google Analytics 4
+        if (window.gtag) {
+          window.gtag('event', 'tarot_card_drawn', {
+            event_category: 'engagement',
+            card_number: next.number
+          });
+        }
+        // Facebook Pixel
+        if (window.fbq) {
+          window.fbq('trackCustom', 'TarotCardDrawn', {
+            card_number: next.number
+          });
+        }
+      }
     }
   };
 
@@ -112,6 +136,25 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
       const json = await res.json();
       if (res.ok && json.success) {
         setStatus('success');
+        
+        // Track successful submission
+        if (typeof window !== 'undefined') {
+          // Google Analytics 4
+          if (window.gtag) {
+            window.gtag('event', 'tarot_reading_signup', {
+              event_category: 'conversion',
+              card_number: currentCard.number,
+              value: 1
+            });
+          }
+          // Facebook Pixel
+          if (window.fbq) {
+            window.fbq('track', 'Lead', {
+              content_name: 'Tarot Reading',
+              card_number: currentCard.number
+            });
+          }
+        }
       } else {
         console.error(json);
         setStatus('error');
@@ -126,6 +169,22 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
     if (!currentCard) return;
     
     const shareText = `I just drew card #${currentCard.number} from the Seea Tarot deck! Get your own reading at seea.co`;
+    
+    // Track share attempt
+    if (typeof window !== 'undefined') {
+      if (window.gtag) {
+        window.gtag('event', 'share', {
+          event_category: 'social',
+          method: 'web_share_api',
+          card_number: currentCard.number
+        });
+      }
+      if (window.fbq) {
+        window.fbq('trackCustom', 'ShareCard', {
+          card_number: currentCard.number
+        });
+      }
+    }
     
     // Use Web Share API if available (works for both Instagram and Facebook stories on mobile)
     if (navigator.share) {
@@ -251,7 +310,7 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                 fontSize: 36, 
                 fontFamily: '"Space Grotesk", sans-serif',
                 fontWeight: 500,
-                color: '#cef664',
+                color: '#13122f',
                 letterSpacing: '0px',
                 textTransform: 'uppercase',
                 lineHeight: '110%'
