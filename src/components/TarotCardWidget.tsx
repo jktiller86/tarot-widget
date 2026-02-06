@@ -323,23 +323,7 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                 fontWeight: 400,
                 textAlign: 'center'
               }}>
-                Pop your name & email below. Then check your inbox (and your junk).
-              </p>
-              <p style={{ 
-                margin: '0 auto', 
-                fontSize: 14, 
-                color: '#f94c16',
-                fontStyle: 'italic',
-                fontFamily: '"Space Mono", monospace',
-                lineHeight: '1.4',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                padding: '12px 16px',
-                borderRadius: 8,
-                textAlign: 'center',
-                maxWidth: '90%',
-                border: '1px solid rgba(249, 76, 22, 0.2)',
-              }}>
-                (You'll get your divine message <strong>and</strong> be first to know when Seea launches in September. Good energy only, no spam. Promise.)
+                Drop your email below. (Good energy only. No spam. Pinky promise. But do check your junk.)
               </p>
             </div>
             <input
