@@ -323,7 +323,7 @@ const TarotCardWidget: React.FC<Props> = ({ subscribeEndpoint }) => {
                 fontWeight: 400,
                 textAlign: 'center'
               }}>
-                Pop your name & email below. Then check your inbox (and your junk).
+                (Good energy only. No spam. Pinky promise. But do check your junk.)
               </p>
             </div>
             <input
